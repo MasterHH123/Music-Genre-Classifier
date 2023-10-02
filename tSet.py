@@ -172,7 +172,7 @@ for genreFolder in os.listdir(directory):
                 sound_Datasets.append(dataset)
 
 
-print("you've made it far with Fabi")
+print("you've made it far, next steps are datasplitting, DataLoader and model building")
 
 
 
