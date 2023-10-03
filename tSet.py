@@ -5,7 +5,7 @@ import os
 import pandas as pd
 from torchaudio import transforms
 from IPython.display import Audio
-from torch.utils.data import DataLoader, Dataset, random_split
+from torch.utils.data import DataLoader, Dataset, random_split, ConcatDataset
 
 
 
@@ -151,12 +151,13 @@ genres = []
 for root, _, files in os.walk(directory):
     for file in files:
         if file.endswith('.wav'):
-            genre = os.path.basename(root)
+            genre = os.path.basename(os.path.dirname(root))
             file_paths.append(os.path.join(root, file))
             genres.append(genre)
 
 data = {'File Path': file_paths, 'Genre': genres}
 df = pd.DataFrame(data)
+print(df)
 
 
 sound_Datasets = []
@@ -171,8 +172,27 @@ for genreFolder in os.listdir(directory):
                 dataset = SoundDS(df, filePath)
                 sound_Datasets.append(dataset)
 
+#print(sound_Datasets)
+#turned the list of Objects into  a Dataset datatype which the dataloader expects
+MyDS = ConcatDataset(sound_Datasets)
+for value in MyDS:
+    print(value)
 
-print("you've made it far, next steps are datasplitting, DataLoader and model building")
+num_items = len(MyDS)
+num_train = round(num_items * 0.8)
+num_val = num_items - num_train
+train_ds, val_ds = random_split(MyDS, [num_train, num_val])
 
+train_dl = torch.utils.data.DataLoader(train_ds, batch_size=16, shuffle=True)
+val_dl = torch.utils.data.DataLoader(val_ds, batch_size=16, shuffle=False)
+
+
+
+
+print("you've made it far, model building is next")
+
+
+#Next step is to create the model
+#Since the data consists of spectrogram images, I can use a CNN classification architecture to process them.
 
 
